@@ -8,13 +8,13 @@ const PrivateMessageSchema = new mongoose.Schema({
     to_user:{
         type: String,
         required: true,
-    }
+    },
     message:{
         type: String,
         required: true,
-    }
+    },
     date_sent:{
         type: Date,
         default: Date.now
-    }
+    },
 })
