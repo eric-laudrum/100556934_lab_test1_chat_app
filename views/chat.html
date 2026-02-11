@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Chat App: Chat</title>
+        <link rel="stylesheet" href="../App.css">
+    
+    </head>
+    <body>
+        <div class="message-container">
+           <!-- rooms: devops, cloud computing, covid19, sports, nodeJS -->
+            <div>
+                <label for="select-room">Select a chat room: </label>
+                
+                <select id="select-room">
+                    <option value="devops">devops</option>
+                    <option value="cloud computing">cloud computing</option>
+                    <option value="sports">sports</option>
+                    <option value="covid19">covid19</option>
+                    <option value="nodeJS">nodeJS</option>
+                </select>
+
+                <button id="join-button" onclick="joinRoom()">Join Room</button>
+                <button id="leave-button" onclick="leaveRoom()">Leave Room</button>
+            </div>
+
+            <div id="chat-window">
+                <!-- Empty to hold chat -->
+            </div>
+
+            <div class="chat-input">
+                <input type="text" id="chat-input">
+                <button onclick="sendMessage()">send</button>
+            </div>
+
+            <button onclick="logout()">Logout</button>
+        </div>
+
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="chat.js"></script>
+
+    </body>
+</html>

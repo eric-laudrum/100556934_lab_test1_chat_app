@@ -78,7 +78,9 @@ ioServer.on("connection", (socket) => {
     // Join chat group
     socket.on('join-group', (room) => {
         socket.join(room);
+
         console.log(`User ${socket.id} joined room: ${room}`);
+        ioServer.to(room).emit('group-ack', `User ${socket.id} joined ${room}`);
     });
 
     // Leave chat group
