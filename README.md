@@ -1,6 +1,8 @@
 # COMP 3133 - 100556934_lab_test1_chat_app
 ## Eric Laudrum
 
+## Github Repository
+- https://github.com/eric-laudrum/100556934_lab_test1_chat_app
 ## Dependencies
 bash
 - npm install express socket.io nodemon
