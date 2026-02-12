@@ -11,9 +11,9 @@ const app = express();
 const SERVER_PORT = process.env.PORT || 3000
 
 
-const Mongo_Uri = process.env.MONGO_URI;
+const mongo_uri = process.env.MONGO_URI
 
-mongoose.connect(Mongo_Uri)
+mongoose.connect(mongo_uri)
     .then(() => console.log("Database connection successful"))
     .catch( err => console.error('Error: Database connection failed: ', err));
 
@@ -22,8 +22,8 @@ app.use( express.static( path.join(__dirname, 'views')));
 
 // Routes
 app.get('/', (req, res) => {
-    res.sendFile( path.join(__dirname, 'views/signup.html')) // make separate home page?
-})
+    res.sendFile( path.join(__dirname, 'views/signup.html'))
+});
 app.get('/signup', (req, res) => {
     res.sendFile( path.join(__dirname, 'views/signup.html'))
 });
@@ -76,11 +76,15 @@ ioServer.on("connection", (socket) => {
     console.log(`User connected: ${socket.id}`);
 
     // Join chat group
-    socket.on('join-group', (room) => {
+    socket.on('join-group', (data) => {
+
+        const { room, username } = data;
         socket.join(room);
 
-        console.log(`User ${socket.id} joined room: ${room}`);
-        ioServer.to(room).emit('group-ack', `User ${socket.id} joined ${room}`);
+        console.log(`${username} joined room: ${room}`);
+
+        ioServer.to(room).emit('group-ack', `${username} joined the room`);
+        
     });
 
     // Leave chat group
@@ -96,15 +100,30 @@ ioServer.on("connection", (socket) => {
 
         const { from_user, room, message } = data;
 
+        // Clean up date string for message stamp
+        const formattedDate = new Date().toLocaleString('en-US', {
+            month: '2-digit',
+            day: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+
+
         const newMessage = new GroupMessage({
             from_user,
             room,
             message,
-            date_sent: new Date().toLocaleString()
+            date_sent: formattedDate
         });
 
         try {
             await newMessage.save(); // Saves to Atlas
+
+            // Include date sent
+            data.date_sent = formattedDate;
+
             ioServer.to(room).emit('chat-ack', data); // Broadcast to room
         } catch (err) {
             console.error("Save error:", err);

@@ -2,12 +2,37 @@ const socket = io();
 const username = localStorage.getItem('username');
 let currentRoom = "";
 
+// Check Authorization
 if (!username) {
     window.location.href = 'login.html';
 }
 
+const userDisplay = document.getElementById('display-username');
+if (userDisplay) userDisplay.textContent = username;
+
+
 document.getElementById('display-username').textContent = username;
 
+
+
+
+
+const input = document.getElementById('chat-input');
+if (input) {
+    input.addEventListener('keypress', () => {
+        if (currentRoom) {
+            socket.emit('typing', { username, room: currentRoom });
+        }
+    });
+}
+
+socket.on('display-typing', (data) =>{
+    const userIsTyping = document.getElementById('typing-status');
+    if( userIsTyping ){
+        userIsTyping.textContent = `${data.username} is typing...`;
+        setTimeout(() => { userIsTyping.textContent = ''; }, 2000);
+    }
+})
     
 // Join chat room
 function joinRoom(){
@@ -23,17 +48,18 @@ function joinRoom(){
     }
 
     currentRoom = room;
-    socket.emit('join-group', room);
+
+    socket.emit('join-group', { room, username });
 
     const chatWindow = document.getElementById('chat-window');
-    chatWindow.innerHTML += `<p>${username} joined ${room}</p>`;
+    chatWindow.innerHTML += `<p>Joined ${room}</p>`;
 }
 
 // Leave chat room
 function leaveRoom() {
     if (currentRoom) {
         socket.emit('leave-group', currentRoom);
-        document.getElementById('chat-window').innerHTML += `<p>${username} left ${currentRoom}</p>`;
+        document.getElementById('chat-window').innerHTML += `<p>Left ${currentRoom}</p>`;
         currentRoom = ""; // reset
     }
 }
@@ -43,25 +69,39 @@ function sendMessage(){
     const input = document.getElementById('chat-input');
     const message = input.value;
 
-    if( message.trim() && currentRoom ){
-        const data={
+    if (message.trim() && currentRoom) {
+        const data = {
             from_user: username,
             room: currentRoom,
             message: message,
-        }
+        };
 
         socket.emit('chat-from-client', data);
         input.value = "";
-    } else{
-        console.log('Select a room to send a message...')
+    } else if( !currentRoom){
+        alert("You must enter a chat room to send messages.")
     }
 }
 
 // Receive Message 
 socket.on('chat-ack', (data) => {
     const chatWindow = document.getElementById('chat-window');
-    chatWindow.innerHTML += `<p>${data.from_user}: ${data.message}</p>`;
-    chatWindow.scrollTop = chatWindow.scrollHeight;
+
+    if (chatWindow) {
+        // Create element to hold message
+        const msgElement = document.createElement('p');
+        msgElement.innerHTML = `
+            <span id="date-sent">(${data.date_sent})</span>
+            <strong>${data.from_user}:</strong> ${data.message}
+        `;
+        // Add to window
+        chatWindow.appendChild(msgElement);
+        
+        // Auto-scroll to bottom
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    } else {
+        console.error("Could not find chat-window element!");
+    }
 });
 
 // Logout

@@ -3,16 +3,32 @@
     <head>
         <meta charset="UTF-8">
         <title>Chat App: Login</title>
-        <link rel="stylesheet" href="../App.css">
+        <link rel="stylesheet" href="App.css">
     
     </head>
     <body>
+
+        <div id="header-placeholder"></div>
+        <script>
+            fetch('header.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('header-placeholder').innerHTML = data;
+                })
+                .catch(err => console.error("Header failed to load:", err));
+        </script>
         <div class="message-container">
+
+            
         
             <h3>Login</h3>
 
             <form id="login-form">
+            
+                <p className="form-label">Username</p>
                 <input type="text" id="username", placeholder="Username" required>
+
+                <p className="form-label">Password</p>
                 <input type="text" id="password", placeholder="Password" required>
                 
                 <button type="submit">Sign In</button>
